@@ -1,0 +1,400 @@
+/dts-v1/;
+
+//#include "bcm2711.dtsi"
+#include "bcm271x.dtsi" // clocks, dma, gpio
+#include "bcm2711-scb.dtsi" 
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include "dt-bindings/power/raspberrypi-power.h"
+#include <dt-bindings/soc/bcm2835-pm.h>
+
+// /memreserve/ 0x00000000 0x00001000;
+// /memreserve/	0x0000000000000000 0x0000000000001000;
+/ {
+	compatible = "raspberrypi,4-model-b", "brcm,bcm2838";
+	model = "Raspberry Pi 4 Model B";
+
+	// aliases {
+	// 	serial0 = "/soc/serial@7e215040";
+	// 	serial1 = "/soc/serial@7e201000";
+	// 	audio = "/soc/audio";
+	// 	aux = "/soc/aux@7e215000";
+	// 	sound = "/soc/sound";
+	// 	soc = "/soc";
+	// 	dma = "/soc/dma@7e007000";
+	// 	watchdog = "/soc/watchdog@7e100000";
+	// 	random = "/soc/rng@7e104000";
+	// 	mailbox = "/soc/mailbox@7e00b880";
+	// 	gpio = "/soc/gpio@7e200000";
+	// 	uart0 = "/soc/serial@7e201000";
+	// 	sdhost = "/soc/mmc@7e202000";
+	// 	mmc0 = "/soc/emmc2@7e340000";
+	// 	i2s = "/soc/i2s@7e203000";
+	// 	spi0 = "/soc/spi@7e204000";
+	// 	i2c0 = "/soc/i2c@7e205000";
+	// 	uart1 = "/soc/serial@7e215040";
+	// 	spi1 = "/soc/spi@7e215080";
+	// 	spi2 = "/soc/spi@7e2150c0";
+	// 	mmc = "/soc/mmc@7e300000";
+	// 	mmc1 = "/soc/mmcnr@7e300000";
+	// 	i2c1 = "/soc/i2c@7e804000";
+	// 	i2c2 = "/soc/i2c@7e805000";
+	// 	usb = "/soc/usb@7e980000";
+	// 	leds = "/leds";
+	// 	fb = "/soc/fb";
+	// 	thermal = "/soc/thermal@7d5d2200";
+	// 	axiperf = "/soc/axiperf";
+	// 	mmc2 = "/soc/mmc@7e202000";
+
+	// 	ethernet0 = "/scb/genet@7d580000";
+	// };
+
+	chosen {
+		bootargs = "coherent_pool=1M 8250.nr_uarts=1 cma=64M";
+		stdout-path = "serial1:115200n8";
+	};
+
+	arm-pmu {
+		compatible = "arm,cortex-a72-pmu", "arm,cortex-a53-pmu";
+        interrupts = <GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH >, 
+                     <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH >, 
+                     <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH >, 
+                     <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH >;
+	};
+
+	timer {
+		compatible = "arm,armv7-timer";
+		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
+                     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
+                     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
+                     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>;
+		arm,cpu-registers-not-fw-configured;
+		always-on;
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		enable-method = "brcm,bcm2836-smp"; // for ARM 32-bit
+		// phandle = < 0xba >;
+
+		cpu@0 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a72";
+			reg = <0>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0x0 0x000000d8>;
+			// phandle = < 0xbb >;
+		};
+
+		cpu@1 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a72";
+			reg = <1>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0x0 0x000000e0>;
+			// phandle = < 0xbc >;
+		};
+
+		cpu@2 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a72";
+			reg = <2>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0x0 0x000000e8>;
+			// phandle = < 0xbd >;
+		};
+
+		cpu@3 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a72";
+			reg = <3>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0x0 0x000000f0>;
+			// phandle = < 0xbe >;
+		};
+	};
+
+	soc {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		ranges = < 0x7e000000 0x00 0xfe000000 0x1800000 0x7c000000 0x00 0xfc000000 0x2000000 0x40000000 0x00 0xff800000 0x800000 >;
+		dma-ranges = < 0xc0000000 0x00 0x00 0x3c000000 >;
+
+		// phandle = < 0x31 >;
+
+   		local_intc: local_intc@40000000 {
+			compatible = "brcm,bcm2836-l1-intc";
+			reg = < 0x40000000 0x100 >;
+			// phandle = < 0xa5 >;
+		};
+
+		firmware: firmware {
+			compatible = "raspberrypi,bcm2835-firmware", "simple-bus";
+			#address-cells = <0>;
+			#size-cells = <0>;
+			mboxes = <&mailbox>;
+			// phandle = < 0x07 >;
+
+			expgpio: gpio {
+				compatible = "raspberrypi,firmware-gpio";
+				gpio-controller;
+				#gpio-cells = <2>;
+				gpio-line-names = "BT_ON", 
+						"WL_ON", 
+						"PWR_LED_OFF", 
+						"GLOBAL_RESET", 
+						"VDD_SD_IO_SEL", 
+						"CAM_GPIO", "\0";
+				status = "okay";
+				// phandle = < 0x2e >;
+			};
+		};
+
+		firmwarekms@7e600000 {
+			compatible = "raspberrypi,rpi-firmware-kms";
+			reg = < 0x7e600000 0x100 >;
+			interrupts = <GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>;
+			brcm,firmware = <&firmware>;
+			status = "disabled";
+			// phandle = < 0xb4 >;
+		};
+
+        power: power {
+			compatible = "raspberrypi,bcm2835-power";
+			firmware = <&firmware>;
+			#power-domain-cells = <1>;
+			// phandle = < 0x11 >;
+		};
+
+		csi0: csi@7e800000 {
+			compatible = "brcm,bcm2835-unicam";
+			reg = < 0x7e800000 0x800 0x7e802000 0x04 >;
+			interrupts = <GIC_SPI 102 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&clocks BCM2835_CLOCK_CAM0>;
+			clock-names = "clk_cam0";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			#clock-cells = <1>;
+			status = "disabled";
+			power-domains = <&power RPI_POWER_DOMAIN_UNICAM0>;
+			// phandle = < 0x9e >;
+		};
+
+		csi1: csi@7e801000 {
+			compatible = "brcm,bcm2835-unicam";
+			reg = < 0x7e801000 0x800 0x7e802004 0x04 >;
+			interrupts = <GIC_SPI 103 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&clocks BCM2835_CLOCK_CAM1>;
+			clock-names = "clk_cam1";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			#clock-cells = <1>;
+			status = "disabled";
+			power-domains = <&power RPI_POWER_DOMAIN_UNICAM1>;
+			// phandle = < 0x9f >;
+
+			port {
+
+				endpoint {
+					data-lanes = < 0x01 0x02 >;
+				};
+			};
+		};
+
+		gicv2: gic400@40041000 {
+			interrupt-controller;
+			#interrupt-cells = <3>;
+			compatible = "arm,gic-400";
+			reg = < 0x40041000 0x1000 0x40042000 0x2000 0x40044000 0x2000 0x40046000 0x2000 >;
+			// phandle = < 0x01 >;
+		};
+
+		emmc2: emmc2@7e340000 {
+			compatible = "brcm,bcm2711-emmc2";
+			status = "okay";
+			interrupts = <GIC_SPI 126 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&clocks 0x33 >; // TODO: 51 is not defined yet.... emmc2
+			reg = < 0x7e340000 0x100 >;
+			broken-cd;
+			vqmmc-supply = <&sd_io_1v8_reg>;
+			// phandle = < 0xb3 >;
+		};
+
+		mmc: mmc@7e300000 {
+			compatible = "brcm,bcm2835-mmc", "brcm,bcm2835-sdhci";
+			reg = < 0x7e300000 0x100 >;
+			interrupts = <GIC_SPI 126 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&clocks BCM2835_CLOCK_EMMC>;
+			dmas = <&dma 11>;
+			dma-names = "rx-tx";
+			brcm,overclock-50 = < 0x00 >;
+			status = "disabled";
+			pinctrl-names = "default";
+			pinctrl-0 = <&emmc_gpio48>;
+			bus-width = < 0x04 >;
+			// phandle = < 0x29 >;
+		};
+
+		mmcnr: mmcnr@7e300000 {
+			compatible = "brcm,bcm2835-mmc", "brcm,bcm2835-sdhci";
+			reg = < 0x7e300000 0x100 >;
+			interrupts = <GIC_SPI 126 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&clocks BCM2835_CLOCK_EMMC>;
+			dmas = <&dma 11>;
+			dma-names = "rx-tx";
+			brcm,overclock-50 = < 0x00 >;
+			non-removable;
+			status = "okay";
+			pinctrl-names = "default";
+			pinctrl-0 = <&sdio_pins>;
+			bus-width = < 0x04 >;
+			// phandle = < 0x2a >;
+		};
+
+		smi: smi@7e600000 {
+			compatible = "brcm,bcm2835-smi";
+			reg = < 0x7e600000 0x100 >;
+			interrupts = <GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&clocks BCM2835_CLOCK_SMI>;
+			assigned-clocks = <&clocks BCM2835_CLOCK_SMI>;
+			assigned-clock-rates = <125000000>;
+			dmas = <&dma 4>;
+			dma-names = "rx-tx";
+			status = "disabled";
+			// phandle = < 0xb5 >;
+		};
+
+		axiperf: axiperf {
+			compatible = "brcm,bcm2835-axiperf";
+			reg = < 0x7e009800 0x100 0x7ee08000 0x100 >;
+			firmware = <&firmware>;
+			status = "disabled";
+			// phandle = < 0x2b >;
+		};
+
+		gpiomem {
+			compatible = "brcm,bcm2835-gpiomem";
+			reg = < 0x7e200000 0x1000 >;
+		};
+
+		fb: fb {
+			compatible = "brcm,bcm2708-fb";
+			firmware = <&firmware>;
+			status = "okay";
+			// phandle = < 0xb6 >;
+		};
+
+		vcsm: vcsm {
+			compatible = "raspberrypi,bcm2835-vcsm";
+			firmware = <&firmware>;
+			status = "okay";
+			// phandle = < 0xb7 >;
+		};
+
+		audio: audio {
+			compatible = "brcm,bcm2835-audio";
+			brcm,pwm-channels = < 0x08 >;
+			status = "disabled";
+			pinctrl-names = "default";
+			pinctrl-0 = <&audio_pins>;
+			// phandle = < 0x26 >;
+		};
+
+		sound: sound {
+			status = "disabled";
+			// phandle = < 0xb8 >;
+		};
+
+		virtgpio: virtgpio {
+			compatible = "brcm,bcm2835-virtgpio";
+			gpio-controller;
+			#gpio-cells = <2>;
+			firmware = <&firmware>;
+			status = "okay";
+			// phandle = < 0xb9 >;
+		};
+	};
+
+	v3dbus {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges = < 0x7c500000 0x00 0xfc500000 0x3300000 0x40000000 0x00 0xff800000 0x800000 >;
+		dma-ranges = < 0x00 0x00 0x00 0x3c000000 >;
+
+		v3d: v3d@7ec04000 {
+			compatible = "brcm,2711-v3d";
+			reg = < 0x7ec00000 0x4000 0x7ec04000 0x4000 >;
+			reg-names = "hub", "core0";
+			power-domains = <&pm BCM2835_RESET_V3D>;
+			resets = <&pm BCM2835_POWER_DOMAIN_GRAFX>;
+			clocks = <&clocks BCM2835_CLOCK_V3D>;
+			interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
+			status = "disabled";
+			// phandle = < 0xbf >;
+		};
+	};
+
+	memory {
+		device_type = "memory";
+		reg = < 0x00 0x00 0x00 >;
+	};
+
+	leds: leds {
+		compatible = "gpio-leds";
+		// phandle = < 0xc5 >;
+
+		act {
+			label = "led0";
+			default-state = "keep";
+			linux,default-trigger = "mmc0";
+			gpios = <&gpio 42 GPIO_ACTIVE_HIGH>; 
+			// phandle = < 0x2c >;
+		};
+
+		pwr {
+			label = "led1";
+			linux,default-trigger = "default-on";
+			gpios = <&expgpio 2 GPIO_ACTIVE_LOW>;
+			// phandle = < 0x2d >;
+		};
+	};
+
+	vdd_3v3_reg: fixedregulator_3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "3v3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		// phandle = < 0xc6 >;
+	};
+
+	vdd_5v0_reg: fixedregulator_5v0 {
+		compatible = "regulator-fixed";
+		regulator-name = "5v0";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		// phandle = < 0x2f >;
+	};
+
+	sd_io_1v8_reg: sd_io_1v8_reg {
+		status = "okay";
+		compatible = "regulator-gpio";
+		vin-supply = <&vdd_5v0_reg>;
+		regulator-name = "vdd-sd-io";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-settling-time-us = <5000>;
+		gpios = <&expgpio 4 GPIO_ACTIVE_HIGH>;
+		states = < 1800000 1 3300000 0 >;
+		// phandle = < 0x18 >;
+	};
+};
