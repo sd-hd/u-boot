@@ -16,41 +16,6 @@
 	compatible = "raspberrypi,4-model-b", "brcm,bcm2838";
 	model = "Raspberry Pi 4 Model B";
 
-	// aliases {
-	// 	serial0 = "/soc/serial@7e215040";
-	// 	serial1 = "/soc/serial@7e201000";
-	// 	audio = "/soc/audio";
-	// 	aux = "/soc/aux@7e215000";
-	// 	sound = "/soc/sound";
-	// 	soc = "/soc";
-	// 	dma = "/soc/dma@7e007000";
-	// 	watchdog = "/soc/watchdog@7e100000";
-	// 	random = "/soc/rng@7e104000";
-	// 	mailbox = "/soc/mailbox@7e00b880";
-	// 	gpio = "/soc/gpio@7e200000";
-	// 	uart0 = "/soc/serial@7e201000";
-	// 	sdhost = "/soc/mmc@7e202000";
-	// 	mmc0 = "/soc/emmc2@7e340000";
-	// 	i2s = "/soc/i2s@7e203000";
-	// 	spi0 = "/soc/spi@7e204000";
-	// 	i2c0 = "/soc/i2c@7e205000";
-	// 	uart1 = "/soc/serial@7e215040";
-	// 	spi1 = "/soc/spi@7e215080";
-	// 	spi2 = "/soc/spi@7e2150c0";
-	// 	mmc = "/soc/mmc@7e300000";
-	// 	mmc1 = "/soc/mmcnr@7e300000";
-	// 	i2c1 = "/soc/i2c@7e804000";
-	// 	i2c2 = "/soc/i2c@7e805000";
-	// 	usb = "/soc/usb@7e980000";
-	// 	leds = "/leds";
-	// 	fb = "/soc/fb";
-	// 	thermal = "/soc/thermal@7d5d2200";
-	// 	axiperf = "/soc/axiperf";
-	// 	mmc2 = "/soc/mmc@7e202000";
-
-	// 	ethernet0 = "/scb/genet@7d580000";
-	// };
-
 	chosen {
 		bootargs = "coherent_pool=1M 8250.nr_uarts=1 cma=64M";
 		stdout-path = "serial1:115200n8";
@@ -210,7 +175,10 @@
 			interrupt-controller;
 			#interrupt-cells = <3>;
 			compatible = "arm,gic-400";
-			reg = < 0x40041000 0x1000 0x40042000 0x2000 0x40044000 0x2000 0x40046000 0x2000 >;
+			reg = < 0x40041000 0x1000 >,
+			      < 0x40042000 0x2000 >, 
+				  < 0x40044000 0x2000 >,
+				  < 0x40046000 0x2000 >;
 			// phandle = < 0x01 >;
 		};
 
@@ -342,7 +310,7 @@
 
 	memory {
 		device_type = "memory";
-		reg = < 0x00 0x00 0x00 >;
+		reg = < 0x00 0x00 0x40000000 >;
 	};
 
 	leds: leds {
