@@ -6,13 +6,8 @@
  * author Andy Fleming
  */
 #include <common.h>
-#include <linux/module.h>
 #include <phy.h>
 #include <linux/brcmphy.h>
-
-MODULE_DESCRIPTION("Broadcom PHY driver");
-MODULE_AUTHOR("Maciej W. Rozycki");
-MODULE_LICENSE("GPL");
 
 /* Broadcom BCM54xx -- taken from linux sungem_phy */
 #define MII_BCM54XX_AUX_CTL_ENCODE(val) (((val & 0x7) << 12)|(val & 0x7))
@@ -423,9 +418,9 @@ static struct phy_driver BCM5241_driver = {
 	.mask	= 0xfffffff0,
 	.name		= "Broadcom BCM5241",
 	/* PHY_BASIC_FEATURES */
-	.config_init	= brcm_fet_config_init,
-	.ack_interrupt	= brcm_fet_ack_interrupt,
-	.config_intr	= brcm_fet_config_intr,
+	.config = &bcm5482_config,
+	.startup = &bcm5482_startup,
+	.shutdown = &genphy_shutdown,
 };
 
 int phy_broadcom_init(void)
