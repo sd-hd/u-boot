@@ -756,14 +756,12 @@ set_contents(fsdata *mydata, dir_entry *dentptr, loff_t pos, __u8 *buffer,
 	/* go to cluster at pos */
 	cur_pos = bytesperclust;
 	while (1) {
+		newclust = get_fatent(mydata, curclust);
 		if (pos <= cur_pos)
 			break;
-		if (IS_LAST_CLUST(curclust, mydata->fatsize))
+		if (IS_LAST_CLUST(newclust, mydata->fatsize))
 			break;
-
-		newclust = get_fatent(mydata, curclust);
-		if (!IS_LAST_CLUST(newclust, mydata->fatsize) &&
-		    CHECK_CLUST(newclust, mydata->fatsize)) {
+		if (CHECK_CLUST(newclust, mydata->fatsize)) {
 			debug("curclust: 0x%x\n", curclust);
 			debug("Invalid FAT entry\n");
 			return -1;
@@ -772,8 +770,9 @@ set_contents(fsdata *mydata, dir_entry *dentptr, loff_t pos, __u8 *buffer,
 		cur_pos += bytesperclust;
 		curclust = newclust;
 	}
-	if (IS_LAST_CLUST(curclust, mydata->fatsize)) {
+	if (IS_LAST_CLUST(newclust, mydata->fatsize)) {
 		assert(pos == cur_pos);
+		filesize -= pos;
 		goto set_clusters;
 	}
 
@@ -814,6 +813,7 @@ set_contents(fsdata *mydata, dir_entry *dentptr, loff_t pos, __u8 *buffer,
 		else
 			offset = pos - cur_pos;
 		wsize = min_t(unsigned long long, actsize, filesize - cur_pos);
+		wsize -= offset;
 		if (get_set_cluster(mydata, curclust, offset,
 				    buffer, wsize, &actsize)) {
 			printf("Error get-and-setting cluster\n");
