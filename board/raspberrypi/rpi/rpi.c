@@ -27,8 +27,8 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-/* From lowlevel_init.S */
-extern unsigned long fw_dtb_pointer;
+/* Assigned in lowlevel_init.S */
+unsigned long fw_dtb_pointer = 0x1;
 
 /* TODO(sjg@chromium.org): Move these to the msg.c file */
 struct msg_get_arm_mem {
