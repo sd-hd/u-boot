@@ -9,6 +9,10 @@
 #include <linux/sizes.h>
 #include <asm/arch/timer.h>
 
+#ifndef __ASSEMBLY__
+#include <asm/arch/base.h>
+#endif
+
 #if defined(CONFIG_TARGET_RPI_2) || defined(CONFIG_TARGET_RPI_3_32B)
 #define CONFIG_SKIP_LOWLEVEL_INIT
 #endif
@@ -68,6 +72,22 @@
 
 #ifdef CONFIG_CMD_USB
 #define CONFIG_TFTP_TSIZE
+#endif
+
+/* DFU over USB/UDC */
+#ifdef CONFIG_CMD_DFU
+#define CONFIG_SYS_DFU_DATA_BUF_SIZE	SZ_1M
+#define CONFIG_SYS_DFU_MAX_FILE_SIZE	SZ_2M
+
+#ifdef CONFIG_ARM64
+#define KERNEL_FILENAME		"Image.gz"
+#else
+#define KERNEL_FILENAME		"zImage"
+#endif
+#define ENV_DFU_SETTINGS \
+	"dfu_alt_info=u-boot.bin fat 0 1;uboot.env fat 0 1;" \
+		      "config.txt fat 0 1;cmdline.txt fat 0 1;" \
+		      KERNEL_FILENAME " fat 0 1\0"
 #endif
 
 /* Console configuration */
@@ -185,6 +205,7 @@
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"dhcpuboot=usb start; dhcp u-boot.uimg; bootm\0" \
 	ENV_DEVICE_SETTINGS \
+	ENV_DFU_SETTINGS \
 	ENV_MEM_LAYOUT_SETTINGS \
 	BOOTENV
 
