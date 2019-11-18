@@ -7,6 +7,8 @@
  */
 #include <common.h>
 #include <phy.h>
+#include <linux/brcmphy.h>
+
 
 /* Broadcom BCM54xx -- taken from linux sungem_phy */
 #define MIIM_BCM54xx_AUXCNTL			0x18
@@ -322,6 +324,66 @@ static int bcm5482_startup(struct phy_device *phydev)
 	return bcm54xx_parse_status(phydev);
 }
 
+static struct phy_driver BCM5411_driver = {
+       .uid            = PHY_ID_BCM5411,
+       .mask   = 0xfffffff0,
+       .name           = "Broadcom BCM5411",
+       /* PHY_GBIT_FEATURES */
+       .config = &bcm5461_config,
+       .startup = &bcm54xx_startup,
+       .shutdown = &genphy_shutdown,
+};
+
+static struct phy_driver BCM5421_driver = {
+       .uid            = PHY_ID_BCM5421,
+       .mask   = 0xfffffff0,
+       .name           = "Broadcom BCM5421",
+       /* PHY_GBIT_FEATURES */
+       .config = &bcm5461_config,
+       .startup = &bcm54xx_startup,
+       .shutdown = &genphy_shutdown,
+};
+
+static struct phy_driver BCM54210E_driver = {
+       .uid            = PHY_ID_BCM54210E,
+       .mask   = 0xffffffff,
+       .name           = "Broadcom BCM54210E",
+       /* PHY_GBIT_FEATURES */
+       .config = &bcm5461_config,
+       .startup = &bcm54xx_startup,
+       .shutdown = &genphy_shutdown,
+};
+
+static struct phy_driver BCM54213PE_driver = {
+       .uid            = PHY_ID_BCM54213PE,
+       .mask   = 0xffffffff,
+       .name           = "Broadcom BCM54213PE",
+       .features       = PHY_GBIT_FEATURES,
+       .config = &bcm5461_config,
+       .startup = &bcm54xx_startup,
+       .shutdown = &genphy_shutdown,
+};
+
+static struct phy_driver BCM5461_driver = {
+       .uid            = PHY_ID_BCM5461,
+       .mask   = 0xfffffff0,
+       .name           = "Broadcom BCM5461",
+       /* PHY_GBIT_FEATURES */
+       .config = &bcm5461_config,
+       .startup = &bcm54xx_startup,
+       .shutdown = &genphy_shutdown,
+};
+
+static struct phy_driver BCM54612E_driver = {
+       .uid            = PHY_ID_BCM54612E,
+       .mask   = 0xfffffff0,
+       .name           = "Broadcom BCM54612E",
+       /* PHY_GBIT_FEATURES */
+       .config = &bcm5461_config,
+       .startup = &bcm54xx_startup,
+       .shutdown = &genphy_shutdown,
+};
+
 static struct phy_driver BCM5461S_driver = {
 	.name = "Broadcom BCM5461S",
 	.uid = 0x2060c0,
@@ -362,12 +424,32 @@ static struct phy_driver BCM_CYGNUS_driver = {
 	.shutdown = &genphy_shutdown,
 };
 
+static struct phy_driver BCM5241_driver = {
+       .uid            = PHY_ID_BCM5241,
+       .mask   = 0xfffffff0,
+       .name           = "Broadcom BCM5241",
+       /* PHY_BASIC_FEATURES */
+       .config = &bcm5482_config,
+       .startup = &bcm5482_startup,
+       .shutdown = &genphy_shutdown,
+};
+
+
 int phy_broadcom_init(void)
 {
+        phy_register(&BCM5411_driver);
+        phy_register(&BCM5421_driver);
+        phy_register(&BCM54210E_driver);
+        phy_register(&BCM54213PE_driver);
+        phy_register(&BCM5461_driver);
+        phy_register(&BCM54612E_driver);
+        phy_register(&BCM5461S_driver);
+        phy_register(&BCM5464S_driver);
 	phy_register(&BCM5482S_driver);
 	phy_register(&BCM5464S_driver);
 	phy_register(&BCM5461S_driver);
 	phy_register(&BCM_CYGNUS_driver);
+        phy_register(&BCM5241_driver);
 
 	return 0;
 }
